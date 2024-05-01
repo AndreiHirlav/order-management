@@ -1,24 +1,27 @@
 package org.example.model;
 
 public class Product {
-    private int idProduct;
+    private int id;
     private String nume;
     private int cantitate;
     private int pret;
 
     public Product(int idProduct, String nume, int cantitate, int pret) {
-        this.idProduct = idProduct;
+        this.id = idProduct;
         this.nume = nume;
         this.cantitate = cantitate;
         this.pret = pret;
     }
+    public Product() {
 
-    public int getIdProduct() {
-        return idProduct;
     }
 
-    public void setIdProduct(int idProduct) {
-        this.idProduct = idProduct;
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int idProduct) {
+        this.id = idProduct;
     }
 
     public int getCantitate() {
@@ -35,5 +38,18 @@ public class Product {
 
     public void setPret(int pret) {
         this.pret = pret;
+    }
+
+    public String getNume() {
+        return nume;
+    }
+
+    public void setNume(String nume) {
+        this.nume = nume;
+    }
+
+    @Override
+    public String toString() {
+        return nume + " (pe stoc: " + cantitate + ")";
     }
 }

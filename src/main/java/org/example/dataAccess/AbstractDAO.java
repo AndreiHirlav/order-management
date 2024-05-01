@@ -2,6 +2,7 @@ package org.example.dataAccess;
 
 import org.example.connection.ConnectionFactory;
 
+import javax.swing.table.DefaultTableModel;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.*;
@@ -11,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,6 +23,32 @@ public class AbstractDAO<T> {
 
     public AbstractDAO() {
         this.type = (Class<T>)  ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+    }
+
+    public static DefaultTableModel buildTable(List<?> list) throws IllegalAccessException {
+        if (list.isEmpty()) {
+            return new DefaultTableModel();
+        }
+
+        Vector<String> columnsNames = new Vector<>();
+        Vector<Vector<Object>> dataVector = new Vector<>();
+
+        Field[] fields = list.get(0).getClass().getDeclaredFields();
+
+        for(Field field : fields) {
+            columnsNames.add(field.getName());
+            field.setAccessible(true);
+        }
+
+        for(Object obj : list) {
+            Vector<Object> data = new Vector<>();
+            for(Field field : fields) {
+                data.add(field.get(obj));  //iau valorile pentru fiecare coloana
+            }
+            dataVector.add(data);
+        }
+
+        return new DefaultTableModel(dataVector, columnsNames);
     }
 
     private String createSelectQuery(String field) {

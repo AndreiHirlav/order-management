@@ -1,22 +1,26 @@
 package org.example.model;
 
 public class Client {
-    private int idClient;
+    private int id;
     private String numeClient;
     private String email;
 
     public Client(int idClient, String numeClient, String email) {
-        this.idClient = idClient;
+        this.id = idClient;
         this.numeClient = numeClient;
         this.email = email;
     }
 
-    public int getIdClient() {
-        return idClient;
+    public Client() {
+
     }
 
-    public void setIdClient(int idClient) {
-        this.idClient = idClient;
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int idClient) {
+        this.id = idClient;
     }
 
     public String getNumeClient() {
@@ -34,4 +38,10 @@ public class Client {
     public void setEmail(String email) {
         this.email = email;
     }
+    @Override
+    public String toString() {
+        return numeClient;
+    }
+
+
 }

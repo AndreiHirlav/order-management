@@ -1,15 +1,24 @@
 package org.example.presentation;
+import org.example.dataAccess.AbstractDAO;
+import org.example.dataAccess.ClientDAO;
+import org.example.dataAccess.ProductDAO;
+import org.example.model.Client;
+import org.example.model.Product;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
 
 public class View extends JFrame{
     public View() {
         setTitle("Order Management");
         setSize(800, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setVisible(true);
         init();
+        setVisible(true);
     }
 
     private void init() {
@@ -23,11 +32,15 @@ public class View extends JFrame{
 
     private JPanel createClientPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        String[] columns = {"idClient", "NumeClient", "Email"};
-        Object[][] data = {};
-        DefaultTableModel model = new DefaultTableModel(data, columns);
-        JTable table = new JTable(model);
-        panel.add(new JScrollPane(table), BorderLayout.CENTER);
+        ClientDAO clientDAO = new ClientDAO();
+        List<Client> clients = clientDAO.findAll();
+        try {
+            JTable table = new JTable(AbstractDAO.buildTable(clients));
+            JScrollPane scrollPane = new JScrollPane(table);
+            panel.add(scrollPane, BorderLayout.CENTER);
+        } catch( IllegalAccessException e ) {
+            e.printStackTrace();
+        }
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(new JButton("Add Client"));
@@ -40,11 +53,15 @@ public class View extends JFrame{
 
     private JPanel createProductPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        String[] columnNames = {"idProduct", "Nume", "Cantitate", "Pret"};
-        Object[][] data = {};  // Replace with actual data retrieval logic
-        DefaultTableModel model = new DefaultTableModel(data, columnNames);
-        JTable table = new JTable(model);
-        panel.add(new JScrollPane(table), BorderLayout.CENTER);
+        ProductDAO productDAO = new ProductDAO();
+        List<Product> products = productDAO.findAll();
+        try {
+            JTable table = new JTable(AbstractDAO.buildTable(products));
+            JScrollPane scrollPane = new JScrollPane(table);
+            panel.add(scrollPane, BorderLayout.CENTER);
+        } catch( IllegalAccessException e ) {
+            e.printStackTrace();
+        }
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(new JButton("Add Product"));
@@ -58,11 +75,22 @@ public class View extends JFrame{
     private JPanel createOrderPanel() {
         JPanel panel = new JPanel(new GridLayout(5, 2, 10, 10));
 
-        JComboBox<String> clientComboBox = new JComboBox<>(new String[]{"Client 1", "Client 2", "Client 3"});
-        JComboBox<String> productComboBox = new JComboBox<>(new String[]{"Product 1", "Product 2", "Product 3"});
-        JTextField quantityField = new JTextField();
-        JButton submitButton = new JButton("Place Order");
+        ClientDAO clientDAO = new ClientDAO();
+        List<Client> clients = clientDAO.findAll();
+        final JComboBox<Client> clientComboBox = new JComboBox<>(clients.toArray(new Client[0]));
 
+        final ProductDAO productDAO = new ProductDAO();
+        List<Product> products = productDAO.findAll();
+        final JComboBox<Product> productComboBox = new JComboBox<>(products.toArray(new Product[0]));
+
+        final JTextField quantityField = new JTextField();
+        JButton submitButton = new JButton("Place Order");
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                handleOrder(clientComboBox, productComboBox, quantityField);
+            }
+        });
         panel.add(new JLabel("Select Client:"));
         panel.add(clientComboBox);
         panel.add(new JLabel("Select Product:"));
@@ -73,5 +101,20 @@ public class View extends JFrame{
         panel.add(submitButton);
 
         return panel;
+    }
+
+    private void handleOrder(JComboBox<Client> clientComboBox, JComboBox<Product> productComboBox, JTextField quantityField) {
+        Client selectedClient = (Client) clientComboBox.getSelectedItem();
+        Product selectedProduct = (Product) productComboBox.getSelectedItem();
+        int quantity = Integer.parseInt(quantityField.getText());
+
+        if(selectedProduct.getCantitate() < quantity) {
+            JOptionPane.showMessageDialog(this, "Not enough stock available.", "Under-Stock", JOptionPane.ERROR_MESSAGE);
+        } else {
+            selectedProduct.setCantitate(selectedProduct.getCantitate() - quantity);
+            ProductDAO productDAO = new ProductDAO();
+            productDAO.updateQuantity(selectedProduct.getId(), quantity);
+            JOptionPane.showMessageDialog(this, "Order placed successfully!", "Order Success", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 }

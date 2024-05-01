@@ -12,6 +12,9 @@ public class Order {
         this.idProduct = idProduct;
         TotalPrice = totalPrice;
     }
+    public Order() {
+
+    }
 
     public int getIdOrder() {
         return idOrder;
