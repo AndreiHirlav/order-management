@@ -13,6 +13,9 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 public class View extends JFrame{
+    ListenerMethods methods = new ListenerMethods();
+    private JTable clientTable;
+    private JTable productTable;
     public View() {
         setTitle("Order Management");
         setSize(800, 600);
@@ -30,23 +33,84 @@ public class View extends JFrame{
         add(tabbedPane);
     }
 
+    public void refreshTables() {
+        refreshClientTable();
+        refreshProductTable();
+    }
+
+    private void refreshClientTable() {
+        DefaultTableModel model = (DefaultTableModel) clientTable.getModel();
+        model.setRowCount(0);
+        ClientDAO clientDAO = new ClientDAO();
+        List<Client> clients = clientDAO.findAll();
+
+        try {
+            for(Client client : clients) {
+                model.addRow(new Object[]{client.getId(), client.getNumeClient(), client.getEmail()});
+            }
+        } catch (Exception e ) {
+            e.printStackTrace();
+        }
+    }
+
+    private void refreshProductTable() {
+        DefaultTableModel model = (DefaultTableModel) productTable.getModel();
+        model.setRowCount(0);
+        ProductDAO productDAO = new ProductDAO();
+        List<Product> products = productDAO.findAll();
+
+        try {
+            for(Product product : products) {
+                model.addRow(new Object[]{product.getId(), product.getNume(), product.getCantitate(), product.getPret()});
+            }
+        } catch (Exception e ) {
+            e.printStackTrace();
+        }
+    }
     private JPanel createClientPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         ClientDAO clientDAO = new ClientDAO();
         List<Client> clients = clientDAO.findAll();
         try {
-            JTable table = new JTable(AbstractDAO.buildTable(clients));
-            JScrollPane scrollPane = new JScrollPane(table);
+            clientTable = new JTable(AbstractDAO.buildTable(clients));
+            JScrollPane scrollPane = new JScrollPane(clientTable);
             panel.add(scrollPane, BorderLayout.CENTER);
         } catch( IllegalAccessException e ) {
             e.printStackTrace();
         }
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.add(new JButton("Add Client"));
-        buttonPanel.add(new JButton("Edit Client"));
-        buttonPanel.add(new JButton("Delete Client"));
+        JButton addButton = new JButton("Add Client");
+        buttonPanel.add(addButton);
+        JButton editButton = new JButton("Edit Client");
+        buttonPanel.add(editButton);
+        JButton deleteButton = new JButton("Delete Client");
+        buttonPanel.add(deleteButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                methods.addClientDialog(View.this);
+                refreshTables();
+            }
+        });
+
+        editButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                methods.editClientDialog(View.this, clientTable);
+                refreshTables();
+            }
+        });
+
+        deleteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                methods.deleteClientDialog(View.this, clientTable);
+                refreshTables();
+            }
+        });
 
         return panel;
     }
@@ -56,18 +120,45 @@ public class View extends JFrame{
         ProductDAO productDAO = new ProductDAO();
         List<Product> products = productDAO.findAll();
         try {
-            JTable table = new JTable(AbstractDAO.buildTable(products));
-            JScrollPane scrollPane = new JScrollPane(table);
+            productTable = new JTable(AbstractDAO.buildTable(products));
+            JScrollPane scrollPane = new JScrollPane(productTable);
             panel.add(scrollPane, BorderLayout.CENTER);
         } catch( IllegalAccessException e ) {
             e.printStackTrace();
         }
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.add(new JButton("Add Product"));
-        buttonPanel.add(new JButton("Edit Product"));
-        buttonPanel.add(new JButton("Delete Product"));
+        JButton addButton = new JButton("Add Product");
+        buttonPanel.add(addButton);
+        JButton editButton = new JButton("Edit Product");
+        buttonPanel.add(editButton);
+        JButton deleteButton = new JButton("Delete ");
+        buttonPanel.add(deleteButton);
         panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                methods.addProductDialog(View.this);
+                refreshTables();
+            }
+        });
+
+        editButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                methods.editProductDialog(View.this, productTable);
+                refreshTables();
+            }
+        });
+
+        deleteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                methods.deleteProductDialog(View.this, productTable);
+                refreshTables();
+            }
+        });
 
         return panel;
     }

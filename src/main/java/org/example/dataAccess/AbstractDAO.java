@@ -244,6 +244,43 @@ public class AbstractDAO<T> {
         return "UPDATE " + type.getSimpleName() + " SET " + setClause.toString() + " WHERE id=?";
     }
 
+    private String createDeleteQuery() {
+        return "DELETE FROM " + type.getSimpleName() + " WHERE id = ?";
+    }
+
+    public boolean delete(T t) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        String query = createDeleteQuery();
+        boolean result = false;
+        try {
+            connection = ConnectionFactory.getConnection();
+            statement = connection.prepareStatement(query);
+
+            Field field = type.getDeclaredField("id");
+            field.setAccessible(true);
+            Object idValue = field.get(t);
+
+            statement.setObject(1, idValue);
+            int rowsAffected = statement.executeUpdate();
+            result = rowsAffected > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error deleting object: " + t, e);
+
+        } catch (NoSuchFieldException e) {
+            LOGGER.log(Level.SEVERE, "Field 'id' not found");
+        }catch (IllegalAccessException e) {
+            LOGGER.log(Level.SEVERE, "Illegal acces to field 'id'", e);
+        } finally {
+            ConnectionFactory.close(statement);
+            ConnectionFactory.close(connection);
+        }
+
+        return result;
+    }
+
+
+
 
 
 }
