@@ -10,7 +10,15 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/**
+ * Contains the methods called in the buttons listeners: add, edit and delete
+ */
+
 public class ListenerMethods {
+    /**
+     * Adds a new client with information entered by the user in a dialog frame.
+     * @param frame
+     */
     public void addClientDialog(JFrame frame) {
         final JDialog dialog = new JDialog(frame, "Add Client", true);
         dialog.setLayout(new BorderLayout());
@@ -46,6 +54,10 @@ public class ListenerMethods {
         dialog.setVisible(true);
     }
 
+    /**
+     * Adds a new product with information entered by the user in a dialog frame.
+     * @param frame
+     */
     public void addProductDialog(JFrame frame) {
         final JDialog dialog = new JDialog(frame, "Add Product", true);
         dialog.setLayout(new BorderLayout());
@@ -85,6 +97,12 @@ public class ListenerMethods {
         dialog.setVisible(true);
     }
 
+
+    /**
+     * Edits a selected client
+     * @param frame
+     * @param table
+     */
     public void editClientDialog(JFrame frame, JTable table) {
         if(table.getSelectedRow() != -1) {
             final JDialog dialog = new JDialog(frame, "Edit Client", true);
@@ -126,6 +144,11 @@ public class ListenerMethods {
         }
     }
 
+    /**
+     * Edits a selected product
+     * @param frame
+     * @param table
+     */
     public void editProductDialog(JFrame frame, JTable table) {
         if(table.getSelectedRow() != -1) {
             final JDialog dialog = new JDialog(frame, "Edit Product", true);
@@ -172,6 +195,11 @@ public class ListenerMethods {
         }
     }
 
+    /**
+     * Deletes a selected client
+     * @param frame
+     * @param table
+     */
     public void deleteClientDialog(JFrame frame, JTable table) {
         if (table.getSelectedRow() != -1) {
             int row = table.getSelectedRow();
@@ -189,6 +217,11 @@ public class ListenerMethods {
         }
     }
 
+    /**
+     * Deletes a selected product
+     * @param frame
+     * @param table
+     */
     public void deleteProductDialog(JFrame frame, JTable table) {
         if (table.getSelectedRow() != -1) {
             int row = table.getSelectedRow();

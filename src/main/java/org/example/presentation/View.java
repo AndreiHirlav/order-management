@@ -14,6 +14,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+/**
+ * The interface of the app
+ */
 public class View extends JFrame{
     ListenerMethods methods = new ListenerMethods();
     private JTable clientTable;
@@ -29,6 +32,9 @@ public class View extends JFrame{
         setVisible(true);
     }
 
+    /**
+     * Creates the tabs for every table
+     */
     private void init() {
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Clients", createClientPanel());
@@ -39,11 +45,17 @@ public class View extends JFrame{
         add(tabbedPane);
     }
 
+    /**
+     * It updates the data in the tables after CRUD operations
+     */
     public void refreshTables() {
         refreshClientTable();
         refreshProductTable();
     }
 
+    /**
+     * Refreshes the client table
+     */
     private void refreshClientTable() {
         DefaultTableModel model = (DefaultTableModel) clientTable.getModel();
         model.setRowCount(0);
@@ -58,6 +70,11 @@ public class View extends JFrame{
             e.printStackTrace();
         }
     }
+
+    /**
+     * Refreshes the client combo box used in the order tab
+     * @param clientComboBox
+     */
     private void refreshClientBox(JComboBox<Client> clientComboBox) {
         ClientDAO clientDAO = new ClientDAO();
         List<Client> clients = clientDAO.findAll();
@@ -67,6 +84,10 @@ public class View extends JFrame{
         }
     }
 
+    /**
+     * Refreshes the product box used in the order tab
+     * @param productComboBox
+     */
     private void refreshProductBox(JComboBox<Product> productComboBox) {
         ProductDAO productDAO = new ProductDAO();
         List<Product> products = productDAO.findAll();
@@ -76,6 +97,9 @@ public class View extends JFrame{
         }
     }
 
+    /**
+     * Refreshes the product table
+     */
     private void refreshProductTable() {
         DefaultTableModel model = (DefaultTableModel) productTable.getModel();
         model.setRowCount(0);
@@ -91,6 +115,9 @@ public class View extends JFrame{
         }
     }
 
+    /**
+     * Refreshes the bill table
+     */
     private void refreshBillTable() {
         DefaultTableModel model = (DefaultTableModel) billTable.getModel();
         model.setRowCount(0);
@@ -105,6 +132,10 @@ public class View extends JFrame{
         }
     }
 
+    /**
+     * It creates the client tab, including data from the Client table and the buttons for performing operations
+     * @return
+     */
     private JPanel createClientPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         ClientDAO clientDAO = new ClientDAO();
@@ -155,6 +186,11 @@ public class View extends JFrame{
 
         return panel;
     }
+
+    /**
+     * It creates the product tab, including data from the Product table and the buttons for performing operations
+     * @return
+     */
 
     private JPanel createProductPanel() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -207,6 +243,11 @@ public class View extends JFrame{
         return panel;
     }
 
+
+    /**
+     * It creates the order tab, using information form Client and Product tables
+     * @return
+     */
     private JPanel createOrderPanel() {
         JPanel panel = new JPanel(new GridLayout(5, 2, 10, 10));
 
@@ -238,6 +279,11 @@ public class View extends JFrame{
         return panel;
     }
 
+    /**
+     * It handles the order action, checking if it's possible or not, and adjusts the new quantity
+     * @param quantityField
+     */
+
     private void handleOrder(JTextField quantityField) {
         Client selectedClient = (Client) clientComboBox.getSelectedItem();
         Product selectedProduct = (Product) productComboBox.getSelectedItem();
@@ -259,7 +305,10 @@ public class View extends JFrame{
 
         }
     }
-
+    /**
+     * It creates the bill tab, including data from the Log table
+     * @return
+     */
     private JPanel createBillPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         BillDAO billDAO = new BillDAO();

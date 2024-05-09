@@ -16,6 +16,11 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * The generic class that contains the methods for accesing the database
+ * @param <T> it can be either Client, Product or Order
+ */
+
 
 public class AbstractDAO<T> {
     protected static final Logger LOGGER = Logger.getLogger(AbstractDAO.class.getName());
@@ -25,6 +30,12 @@ public class AbstractDAO<T> {
         this.type = (Class<T>)  ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     }
 
+    /**
+     * The method for creating the tables
+     * @param list It contains the elements for the table
+     * @return A table with the items for the list
+     * @throws IllegalAccessException
+     */
     public static DefaultTableModel buildTable(List<?> list) throws IllegalAccessException {
         if (list.isEmpty()) {
             return new DefaultTableModel();
@@ -62,6 +73,10 @@ public class AbstractDAO<T> {
         return sb.toString();
     }
 
+    /**
+     *
+     * @return all the elements from a table
+     */
     public List<T> findAll() {
         Connection connection = null;
         PreparedStatement statement = null;
