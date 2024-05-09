@@ -1,7 +1,9 @@
 package org.example.presentation;
 import org.example.dataAccess.AbstractDAO;
+import org.example.dataAccess.BillDAO;
 import org.example.dataAccess.ClientDAO;
 import org.example.dataAccess.ProductDAO;
+import org.example.model.Bill;
 import org.example.model.Client;
 import org.example.model.Product;
 
@@ -16,6 +18,9 @@ public class View extends JFrame{
     ListenerMethods methods = new ListenerMethods();
     private JTable clientTable;
     private JTable productTable;
+    private JTable billTable;
+    JComboBox<Client> clientComboBox;
+    JComboBox<Product> productComboBox;
     public View() {
         setTitle("Order Management");
         setSize(800, 600);
@@ -29,6 +34,7 @@ public class View extends JFrame{
         tabbedPane.addTab("Clients", createClientPanel());
         tabbedPane.addTab("Products", createProductPanel());
         tabbedPane.addTab("Orders", createOrderPanel());
+        tabbedPane.addTab("Log", createBillPanel());
 
         add(tabbedPane);
     }
@@ -52,6 +58,23 @@ public class View extends JFrame{
             e.printStackTrace();
         }
     }
+    private void refreshClientBox(JComboBox<Client> clientComboBox) {
+        ClientDAO clientDAO = new ClientDAO();
+        List<Client> clients = clientDAO.findAll();
+        clientComboBox.removeAllItems();
+        for(Client client : clients) {
+            clientComboBox.addItem(client);
+        }
+    }
+
+    private void refreshProductBox(JComboBox<Product> productComboBox) {
+        ProductDAO productDAO = new ProductDAO();
+        List<Product> products = productDAO.findAll();
+        productComboBox.removeAllItems();
+        for(Product product : products) {
+            productComboBox.addItem(product);
+        }
+    }
 
     private void refreshProductTable() {
         DefaultTableModel model = (DefaultTableModel) productTable.getModel();
@@ -67,6 +90,21 @@ public class View extends JFrame{
             e.printStackTrace();
         }
     }
+
+    private void refreshBillTable() {
+        DefaultTableModel model = (DefaultTableModel) billTable.getModel();
+        model.setRowCount(0);
+        List<Bill> bills = BillDAO.readBills();
+
+        try {
+            for(Bill bill : bills) {
+                model.addRow(new Object[]{bill.idClient(), bill.idProdus(), bill.cantitate(), bill.pretTotal()});
+            }
+        } catch (Exception e ) {
+            e.printStackTrace();
+        }
+    }
+
     private JPanel createClientPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         ClientDAO clientDAO = new ClientDAO();
@@ -93,6 +131,7 @@ public class View extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 methods.addClientDialog(View.this);
                 refreshTables();
+                refreshClientBox(clientComboBox);
             }
         });
 
@@ -101,6 +140,7 @@ public class View extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 methods.editClientDialog(View.this, clientTable);
                 refreshTables();
+                refreshClientBox(clientComboBox);
             }
         });
 
@@ -109,6 +149,7 @@ public class View extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 methods.deleteClientDialog(View.this, clientTable);
                 refreshTables();
+                refreshClientBox(clientComboBox);
             }
         });
 
@@ -141,6 +182,7 @@ public class View extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 methods.addProductDialog(View.this);
                 refreshTables();
+                refreshProductBox(productComboBox);
             }
         });
 
@@ -149,6 +191,7 @@ public class View extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 methods.editProductDialog(View.this, productTable);
                 refreshTables();
+                refreshProductBox(productComboBox);
             }
         });
 
@@ -157,6 +200,7 @@ public class View extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 methods.deleteProductDialog(View.this, productTable);
                 refreshTables();
+                refreshProductBox(productComboBox);
             }
         });
 
@@ -168,18 +212,18 @@ public class View extends JFrame{
 
         ClientDAO clientDAO = new ClientDAO();
         List<Client> clients = clientDAO.findAll();
-        final JComboBox<Client> clientComboBox = new JComboBox<>(clients.toArray(new Client[0]));
+        clientComboBox = new JComboBox<>(clients.toArray(new Client[0]));
 
         final ProductDAO productDAO = new ProductDAO();
         List<Product> products = productDAO.findAll();
-        final JComboBox<Product> productComboBox = new JComboBox<>(products.toArray(new Product[0]));
+        productComboBox = new JComboBox<>(products.toArray(new Product[0]));
 
         final JTextField quantityField = new JTextField();
         JButton submitButton = new JButton("Place Order");
         submitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                handleOrder(clientComboBox, productComboBox, quantityField);
+                handleOrder(quantityField);
             }
         });
         panel.add(new JLabel("Select Client:"));
@@ -194,7 +238,7 @@ public class View extends JFrame{
         return panel;
     }
 
-    private void handleOrder(JComboBox<Client> clientComboBox, JComboBox<Product> productComboBox, JTextField quantityField) {
+    private void handleOrder(JTextField quantityField) {
         Client selectedClient = (Client) clientComboBox.getSelectedItem();
         Product selectedProduct = (Product) productComboBox.getSelectedItem();
         int quantity = Integer.parseInt(quantityField.getText());
@@ -202,10 +246,32 @@ public class View extends JFrame{
         if(selectedProduct.getCantitate() < quantity) {
             JOptionPane.showMessageDialog(this, "Not enough stock available.", "Under-Stock", JOptionPane.ERROR_MESSAGE);
         } else {
+            BillDAO billDAO = new BillDAO();
+            billDAO.insertBill(new Bill(selectedClient.getId(), selectedProduct.getId(), quantity, quantity * selectedProduct.getPret()));
+
             selectedProduct.setCantitate(selectedProduct.getCantitate() - quantity);
             ProductDAO productDAO = new ProductDAO();
             productDAO.updateQuantity(selectedProduct.getId(), quantity);
             JOptionPane.showMessageDialog(this, "Order placed successfully!", "Order Success", JOptionPane.INFORMATION_MESSAGE);
+            refreshTables();
+            refreshProductBox(productComboBox);
+            refreshBillTable();
+
         }
+    }
+
+    private JPanel createBillPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        BillDAO billDAO = new BillDAO();
+        List<Bill> bills = BillDAO.readBills();
+        try {
+            billTable = new JTable(AbstractDAO.buildTable(bills));
+            JScrollPane scrollPane = new JScrollPane(billTable);
+            panel.add(scrollPane, BorderLayout.CENTER);
+        } catch( IllegalAccessException e ) {
+            e.printStackTrace();
+        }
+
+        return panel;
     }
 }
